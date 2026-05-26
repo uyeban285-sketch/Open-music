@@ -7,7 +7,9 @@ import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { LoginRateLimitMiddleware } from './auth/middleware/rate-limit.middleware';
 import { envSchema } from './config/env.schema';
+import { ConnectorsModule } from './connectors/connectors.module';
 import { HealthModule } from './health/health.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 import { KmsModule } from './kms/kms.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
@@ -42,6 +44,8 @@ function validate(config: Record<string, unknown>): Record<string, unknown> {
     AuditModule,
     AuthModule,
     TokenVaultModule,
+    ConnectorsModule,
+    IntegrationsModule,
   ],
 })
 export class AppModule implements NestModule {
