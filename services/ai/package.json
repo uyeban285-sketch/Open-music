@@ -1,0 +1,12 @@
+{
+  "name": "@open-music/ai-service",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Python FastAPI AI service (managed alongside JS workspace, not built by pnpm)",
+  "scripts": {
+    "build": "echo \"ai service uses Python; see services/ai/README.md\"",
+    "lint": "echo \"ai service uses Python; see services/ai/README.md\"",
+    "typecheck": "echo \"ai service uses Python; see services/ai/README.md\"",
+    "test": "echo \"ai service tests live in services/ai/tests; see services/ai/README.md\""
+  }
+}
