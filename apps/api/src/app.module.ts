@@ -11,6 +11,7 @@ import { ConnectorsModule } from './connectors/connectors.module';
 import { HealthModule } from './health/health.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { KmsModule } from './kms/kms.module';
+import { MatchingModule } from './matching/matching.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { TokenVaultModule } from './token-vault/token-vault.module';
@@ -46,6 +47,7 @@ function validate(config: Record<string, unknown>): Record<string, unknown> {
     TokenVaultModule,
     ConnectorsModule,
     IntegrationsModule,
+    MatchingModule,
   ],
 })
 export class AppModule implements NestModule {
