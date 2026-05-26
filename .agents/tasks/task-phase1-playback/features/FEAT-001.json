@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Implement playback module (Task 18.1): state machine (idle/loading/playing/paused/buffering), queue management, REST endpoints for play/pause/seek/next/prev/queue. Persist playback state in PlaybackSession with monotonic revision. Include unit tests for state machine transitions.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create apps/api/src/playback/playback-state.ts with pure function applyCommand(session: PlaybackSessionState, command: PlaybackCommand): PlaybackSessionState. Commands: play, pause, seek(positionMs), next, prev, setQueue(trackIds), reorder(from, to), setShuffle(enabled), setRepeat(mode), setVolume(level). State transitions enforce the state machine: idle->loading->playing, playing<->paused, any->buffering->playing.",
     "Create apps/api/src/playback/playback.service.ts - NestJS Injectable with PrismaService. Methods: getState(userId), play(userId, trackId?), pause(userId), seek(userId, positionMs), next(userId), prev(userId), setQueue(userId, trackIds), reorder(userId, from, to), setShuffle(userId, enabled), setRepeat(userId, mode), setVolume(userId, level). Each method loads PlaybackSession (or creates if none), applies command, increments revision, saves.",
@@ -29,5 +29,5 @@
     "pnpm run build"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All verification passed: tests (117 passed), typecheck, lint, and build all clean. Used vitest with vi.fn() mocking pattern consistent with existing tests. BigInt revision handled correctly in state machine and service layer."
 }
