@@ -16,6 +16,7 @@ import { MatchingModule } from './matching/matching.module';
 import { PlaybackModule } from './playback/playback.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { SettingsModule } from './settings/settings.module';
 import { TokenVaultModule } from './token-vault/token-vault.module';
 
 function validate(config: Record<string, unknown>): Record<string, unknown> {
@@ -52,6 +53,7 @@ function validate(config: Record<string, unknown>): Record<string, unknown> {
     LibraryModule,
     MatchingModule,
     PlaybackModule,
+    SettingsModule,
   ],
 })
 export class AppModule implements NestModule {
