@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Initialize NestJS app with proper config, validation, healthchecks, structured logger (Task 4.1), RLS middleware (Task 4.2), and Prisma schema with User model (Task 4.3). Also set up mock-KMS placeholder (Task 2.2) and seed script (Task 2.3).",
+  "status": "in_progress",
+  "steps": [
+    "Add NestJS core dependencies to apps/api/package.json: @nestjs/core, @nestjs/common, @nestjs/platform-express, @nestjs/config, reflect-metadata, rxjs, nestjs-pino, pino, pino-http, pino-pretty (devDep), zod, @prisma/client. DevDeps: prisma, @types/express, vitest, @nestjs/testing",
+    "Rewrite apps/api/src/main.ts as proper NestJS bootstrap: create NestFactory.create(AppModule), configure pino logger, set global prefix 'api', graceful shutdown hooks, listen on port from config",
+    "Create apps/api/src/app.module.ts as root module importing ConfigModule (with Zod env validation schema), HealthModule, PrismaModule, AuthModule (placeholder empty)",
+    "Create apps/api/src/config/env.schema.ts with Zod schema validating DATABASE_URL, REDIS_URL, API_PORT, NODE_ENV, JWT_SECRET, JWT_EXPIRY, etc.",
+    "Create apps/api/src/health/health.module.ts and health.controller.ts with GET /healthz (liveness) and GET /readyz (readiness check for Postgres and Redis ping)",
+    "Create apps/api/src/common/filters/problem-details.filter.ts implementing ExceptionFilter to return RFC 7807 ProblemDetails JSON responses",
+    "Create apps/api/src/common/pipes/zod-validation.pipe.ts implementing PipeTransform for Zod schema validation",
+    "Create apps/api/src/prisma/prisma.module.ts and prisma.service.ts wrapping PrismaClient with onModuleInit/onModuleDestroy lifecycle hooks",
+    "Create apps/api/src/common/middleware/rls.middleware.ts that reads userId from request (will come from JWT guard later) and executes SET LOCAL app.user_id = $userId on the Prisma connection via $executeRawUnsafe",
+    "Create apps/api/prisma/schema.prisma with datasource, generator, extensions (pgcrypto, citext, pg_trgm, vector), User model (id UUID, email CITEXT unique, passwordHash nullable, ssoProvider nullable, role enum listener/enthusiast/power_user/admin, mfaEnabled, mfaSecret, displayName, avatarUrl, createdAt, updatedAt, deletedAt nullable), PrivacySetting model, AuditLog model (append-only: id, userId, action, category, metadata JSON, ipAddress, createdAt)",
+    "Add mock-KMS service: create apps/api/src/kms/kms.module.ts and kms.service.ts with interface KmsClient (encrypt, decrypt, generateDataKey) and MockKmsService implementation using Node.js crypto (AES-256-GCM with random keys stored in-memory for dev)",
+    "Create apps/api/src/seed.ts script that: connects to Prisma, creates admin user (admin@openmusic.dev) and listener user (listener@openmusic.dev) with hashed passwords, creates sample FeatureFlag records. Add 'db:seed:dev' script to apps/api/package.json",
+    "Update apps/api/tsconfig.json to ensure paths work with new structure (keep experimentalDecorators, emitDecoratorMetadata)",
+    "Run pnpm install, then pnpm run typecheck and pnpm run lint to verify everything compiles"
+  ],
+  "acceptance_criteria": [
+    "apps/api/src/main.ts is a proper NestJS bootstrap with graceful shutdown",
+    "apps/api/src/app.module.ts imports ConfigModule with Zod env validation",
+    "GET /healthz returns { status: 'ok' }",
+    "ProblemDetails exception filter returns RFC 7807 compliant error responses",
+    "Prisma schema has User, PrivacySetting, AuditLog models with proper types",
+    "RLS middleware exists and sets app.user_id from request",
+    "Mock-KMS service implements encrypt/decrypt/generateDataKey",
+    "Seed script exists and can be run with 'pnpm db:seed:dev'",
+    "pnpm run typecheck passes for the api package",
+    "pnpm run lint passes"
+  ],
+  "verification": ["pnpm run typecheck", "pnpm run lint", "pnpm run build"],
+  "blocked_reason": null,
+  "findings": ""
+}

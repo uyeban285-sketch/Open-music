@@ -1,11 +1,24 @@
-// Open Music API entry point.
-// NestJS bootstrap is implemented in task 3.1.
+import 'reflect-metadata';
 
-export function bootstrap(): void {
-  // eslint-disable-next-line no-console
-  console.info('Open Music API placeholder. Bootstrap will be implemented in task 3.1.');
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { Logger } from 'nestjs-pino';
+
+import { AppModule } from './app.module';
+import { ProblemDetailsFilter } from './common/filters/problem-details.filter';
+
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  app.useLogger(app.get(Logger));
+  app.setGlobalPrefix('api', { exclude: ['healthz', 'readyz'] });
+  app.useGlobalFilters(new ProblemDetailsFilter());
+  app.enableShutdownHooks();
+
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('API_PORT', 3000);
+
+  await app.listen(port);
 }
 
-if (require.main === module) {
-  bootstrap();
-}
+void bootstrap();
