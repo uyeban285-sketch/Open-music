@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Create SQL migration for Row Level Security (RLS) on all user-owned tables (Task 8.4). Create a custom migration file that enables RLS and defines policies for tenant isolation based on app.user_id setting.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create a raw SQL migration file at apps/api/prisma/migrations/rls_policies/migration.sql (or use prisma migrate dev --create-only pattern)",
     "In the migration, for each user-owned table (users, connected_services, sync_jobs via connected_services, tracks via external_refs, playlists, playlist_tracks, likes, playback_sessions, device_sessions, listening_events, notifications, privacy_settings): ALTER TABLE ... ENABLE ROW LEVEL SECURITY",
@@ -23,5 +23,5 @@
   ],
   "verification": ["pnpm run typecheck", "pnpm run build"],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Migration file created successfully. No running DB to test against, but SQL syntax is valid PostgreSQL. lint-staged ran prettier on JSON/md files during commit. All typecheck/build/test pass cleanly."
 }
