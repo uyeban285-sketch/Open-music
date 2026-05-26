@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Create SQL migration for Row Level Security (RLS) on all user-owned tables (Task 8.4). Create a custom migration file that enables RLS and defines policies for tenant isolation based on app.user_id setting.",
+  "status": "in_progress",
+  "steps": [
+    "Create a raw SQL migration file at apps/api/prisma/migrations/rls_policies/migration.sql (or use prisma migrate dev --create-only pattern)",
+    "In the migration, for each user-owned table (users, connected_services, sync_jobs via connected_services, tracks via external_refs, playlists, playlist_tracks, likes, playback_sessions, device_sessions, listening_events, notifications, privacy_settings): ALTER TABLE ... ENABLE ROW LEVEL SECURITY",
+    "Create RLS policies: CREATE POLICY tenant_isolation ON <table> USING (user_id = current_setting('app.user_id')::uuid) for tables with direct user_id column",
+    "For tables without direct user_id (like sync_jobs via connected_service_id): create join-based policies or skip RLS (they will be accessed through service-layer checks)",
+    "Create a database role 'app_user' WITHOUT BYPASSRLS if not exists, and GRANT appropriate permissions",
+    "Document in a comment which tables have RLS and which rely on service-layer checks",
+    "Since we cannot run prisma migrate in this sandbox (no DB), validate the SQL syntax is correct and the approach matches PostgreSQL RLS best practices",
+    "Run pnpm run typecheck and pnpm run lint to verify no regressions"
+  ],
+  "acceptance_criteria": [
+    "RLS migration SQL file exists with ENABLE ROW LEVEL SECURITY for user-owned tables",
+    "Policies reference current_setting('app.user_id')::uuid",
+    "app_user role is created without BYPASSRLS",
+    "SQL syntax is valid PostgreSQL",
+    "pnpm run typecheck passes",
+    "pnpm run build passes"
+  ],
+  "verification": ["pnpm run typecheck", "pnpm run build"],
+  "blocked_reason": null,
+  "findings": ""
+}
