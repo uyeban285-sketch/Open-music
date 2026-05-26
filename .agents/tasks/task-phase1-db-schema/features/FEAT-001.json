@@ -1,0 +1,47 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Extend Prisma schema with integration entities (ConnectedService, SyncJob) and media catalog entities (Track, Album, Artist, TrackExternalRef, MatchDecision, Playlist, PlaylistTrack, Like), playback entities (PlaybackSession, DeviceSession, ListeningEvent), and system entities (Notification, FeatureFlag). Add all indices. This is Task 8.1 + 8.2 + 8.3 from the spec.",
+  "status": "completed",
+  "steps": [
+    "Read the current Prisma schema at apps/api/prisma/schema.prisma to understand existing models (User, PrivacySetting, AuditLog)",
+    "Read packages/shared/src/connectors/types.ts and packages/shared/src/dto/models.ts to understand existing TypeScript types that should align with the Prisma schema",
+    "Add ConnectedService model: id UUID, userId UUID (FK User), connectorId String, status enum (connected/disconnected/error/token_expired/reauth_required), accessTokenCt Bytes, refreshTokenCt Bytes, dekId String, tokenExpiresAt DateTime?, lastSyncedAt DateTime?, createdAt, updatedAt. UNIQUE(userId, connectorId). Relations to User and SyncJob[].",
+    "Add SyncJob model: id UUID, connectedServiceId UUID (FK ConnectedService), kind enum (full/incremental), status enum (pending/running/partial/completed/failed), progress Json (total, done), error String?, startedAt DateTime?, completedAt DateTime?, createdAt. Index on (connectedServiceId, createdAt DESC).",
+    "Add Track model: id UUID, canonicalTitle String, canonicalArtist String, albumTitle String?, duration Int (seconds), isrc String?, genre String[]?, audioFeatures Json?, embedding (use Unsupported for vector type with comment), availability Json?, isLive Boolean default false, explicit Boolean default false, createdAt, updatedAt. Index on isrc. NOTE: pgvector extension handles the vector type via raw SQL migration.",
+    "Add Album model: id UUID, title String, artistName String, coverUrl String?, releaseYear Int?, createdAt.",
+    "Add Artist model: id UUID, name String, externalIds Json?, createdAt.",
+    "Add TrackExternalRef model: id UUID, trackId UUID (FK Track), connectorId String, externalId String, metadataSnapshot Json?, availability String default 'available', createdAt, updatedAt. UNIQUE(connectorId, externalId). Index on trackId.",
+    "Add MatchDecision model: id UUID, trackAId UUID (FK Track), trackBId UUID (FK Track), confidence Float, status enum (auto_merged/probable_pending/no_link/user_confirmed/user_rejected/reverted), signals Json?, decidedBy String (system/userId), decidedAt DateTime, revertedAt DateTime?, createdAt. Index on status. Index on (trackAId, trackBId).",
+    "Add Playlist model: id UUID, userId UUID (FK User), title String, description String?, isImported Boolean default false, sourceConnectorId String?, sourceExternalId String?, coverUrl String?, trackCount Int default 0, createdAt, updatedAt. Index on userId.",
+    "Add PlaylistTrack model: id UUID, playlistId UUID (FK Playlist), trackId UUID (FK Track), position Int, addedAt DateTime default now(). UNIQUE(playlistId, trackId). Index on (playlistId, position).",
+    "Add Like model: id UUID, userId UUID (FK User), trackId UUID (FK Track), createdAt DateTime default now(). UNIQUE(userId, trackId). Index on userId.",
+    "Add PlaybackSession model: id UUID, userId UUID (FK User), revision BigInt default 0, state enum (idle/loading/playing/paused/buffering), currentTrackId UUID? (FK Track), positionMs Int default 0, queue Json default '[]', shuffle Boolean default false, repeatMode enum (off/one/all) default off, volume Int default 100, createdAt, updatedAt. UNIQUE(userId) (one active session per user).",
+    "Add DeviceSession model: id UUID, userId UUID (FK User), playbackSessionId UUID? (FK PlaybackSession), deviceName String, deviceType String, isActive Boolean default true, lastSeenAt DateTime, createdAt. Index on (userId, isActive).",
+    "Add ListeningEvent model: id UUID, userId UUID (FK User), trackId UUID (FK Track), connectorId String?, startedAt DateTime, endedAt DateTime?, durationMs Int?, private Boolean default false, skipReason String?, createdAt. Index (BRIN concept - use regular index) on startedAt. Index on userId.",
+    "Add Notification model: id UUID, userId UUID (FK User), type String, title String, body String?, metadata Json?, readAt DateTime?, createdAt. Index on (userId, readAt). Index on createdAt.",
+    "Add FeatureFlag model: id UUID, key String UNIQUE, enabled Boolean default false, rolloutPercentage Int default 0, metadata Json?, createdAt, updatedAt.",
+    "Ensure all models use @@map for snake_case table names and @map for snake_case column names (following existing pattern)",
+    "Run prisma format to validate schema syntax",
+    "Run pnpm run typecheck and pnpm run lint to verify no regressions"
+  ],
+  "acceptance_criteria": [
+    "Prisma schema includes all required models: ConnectedService, SyncJob, Track, Album, Artist, TrackExternalRef, MatchDecision, Playlist, PlaylistTrack, Like, PlaybackSession, DeviceSession, ListeningEvent, Notification, FeatureFlag",
+    "All models use UUID primary keys with gen_random_uuid()",
+    "All relations and foreign keys are properly defined",
+    "UNIQUE constraints are defined as specified",
+    "Indices are defined for common query patterns",
+    "Table and column names use snake_case via @@map/@map",
+    "prisma format passes without errors",
+    "pnpm run typecheck passes",
+    "pnpm run build passes (prisma generate succeeds)"
+  ],
+  "verification": [
+    "npx prisma format --schema apps/api/prisma/schema.prisma",
+    "npx prisma validate --schema apps/api/prisma/schema.prisma",
+    "pnpm run typecheck",
+    "pnpm run build"
+  ],
+  "blocked_reason": null,
+  "findings": "Global npx prisma resolves to v7.8.0 which has breaking changes (no datasource url). Must use project-local prisma via pnpm --filter. DATABASE_URL env var must be set for prisma validate (use dummy value in sandbox). All 20 existing tests still pass after schema changes."
+}
