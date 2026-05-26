@@ -1,0 +1,38 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement TokenVaultService with pluggable KMS backend (Task 9.1) and AuditService for security event logging (Task 9.2). The TokenVaultService wraps/unwraps connector tokens using envelope encryption (AES-256-GCM DEK encrypted by KMS KEK). Each unwrap operation is logged to audit_log.",
+  "status": "completed",
+  "steps": [
+    "Create apps/api/src/token-vault/token-vault.service.ts implementing: wrap(connectedServiceId, plainToken) -> stores encrypted token (ciphertext + dekId) in ConnectedService record; unwrap(connectedServiceId, userId) -> decrypts and returns plain token, writes audit log entry",
+    "Create apps/api/src/token-vault/token-vault.module.ts importing KmsModule, PrismaModule",
+    "The wrap method should: call kms.encrypt(Buffer.from(plainToken)), update ConnectedService with accessTokenCt/refreshTokenCt and dekId",
+    "The unwrap method should: read ConnectedService record, call kms.decrypt(ciphertext, dekId), write AuditLog entry with action='token_unwrap', category='security', metadata={connectedServiceId, userId}, return plaintext",
+    "Add methods: wrapAccessToken, wrapRefreshToken, unwrapAccessToken, unwrapRefreshToken for convenience",
+    "Create apps/api/src/audit/audit.service.ts with methods: log(action, category, userId?, metadata?, ipAddress?) -> creates AuditLog record via Prisma. Categories: 'auth', 'security', 'data', 'admin'",
+    "Create apps/api/src/audit/audit.module.ts (global module) importing PrismaModule",
+    "Wire TokenVaultModule and AuditModule into AppModule",
+    "Create apps/api/src/token-vault/__tests__/token-vault.service.spec.ts testing: wrap stores encrypted data, unwrap returns original plaintext (round-trip), unwrap logs to audit, unwrap with missing DEK throws",
+    "Create apps/api/src/audit/__tests__/audit.service.spec.ts testing: log creates AuditLog record with correct fields",
+    "Run pnpm run typecheck, pnpm run lint, pnpm run build, pnpm run test"
+  ],
+  "acceptance_criteria": [
+    "TokenVaultService.wrap encrypts token and stores ciphertext + dekId in ConnectedService",
+    "TokenVaultService.unwrap decrypts and returns original token",
+    "Every unwrap call creates an AuditLog entry",
+    "AuditService.log creates entries in the audit_logs table",
+    "Round-trip test: wrap(token) then unwrap returns same token",
+    "All existing tests continue to pass",
+    "pnpm run typecheck passes",
+    "pnpm run lint passes",
+    "pnpm run build passes"
+  ],
+  "verification": [
+    "pnpm --filter @open-music/api run test",
+    "pnpm run typecheck",
+    "pnpm run lint",
+    "pnpm run build"
+  ],
+  "blocked_reason": null,
+  "findings": "Prisma Json type requires casting Record<string, unknown> to Prisma.InputJsonValue. All tests pass (29/29), typecheck clean, lint clean, build clean."
+}
