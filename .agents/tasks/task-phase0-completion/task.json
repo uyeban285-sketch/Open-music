@@ -1,0 +1,7 @@
+{
+  "task_id": "task-phase0-completion",
+  "task_description": "Complete Phase 0 of Open Music: install deps, fix baseline, set up CI/security, create shared contracts, set up NestJS/Next.js skeletons, implement auth module with tests",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null
+}

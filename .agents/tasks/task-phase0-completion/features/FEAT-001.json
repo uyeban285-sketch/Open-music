@@ -1,0 +1,22 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Install dependencies and verify baseline. Set up pnpm install, ensure lint/typecheck/build pass on current placeholder code.",
+  "status": "in_progress",
+  "steps": [
+    "Run `pnpm install` in the workspace root to install all dependencies",
+    "Run `pnpm run lint` and fix any issues with the placeholder code",
+    "Run `pnpm run typecheck` and fix any TypeScript errors in placeholder files",
+    "Run `pnpm run build` and ensure it passes (currently just tsc for packages)",
+    "Verify all existing workspace packages resolve correctly"
+  ],
+  "acceptance_criteria": [
+    "`pnpm install` completes without errors",
+    "`pnpm run lint` passes with no errors",
+    "`pnpm run typecheck` passes for all packages",
+    "`pnpm run build` completes successfully"
+  ],
+  "verification": ["pnpm install", "pnpm run lint", "pnpm run typecheck", "pnpm run build"],
+  "blocked_reason": null,
+  "findings": ""
+}
