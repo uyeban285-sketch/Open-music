@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-002",
+  "type": "chore",
+  "description": "Enhance GitHub Actions CI pipeline (Task 1.3) and add pre-commit security gates (Task 1.4). Update the existing ci.yml with proper caching, add secret scanning with gitleaks, dependency vulnerability scanning, and SBOM generation.",
+  "status": "in_progress",
+  "steps": [
+    "Update .github/workflows/ci.yml to add pnpm store caching using actions/cache with key based on pnpm-lock.yaml hash",
+    "Add security scanning job to CI: install and run gitleaks via docker action (gitleaks/gitleaks-action@v2) on all PRs",
+    "Add dependency vulnerability scanning step: run 'pnpm audit --audit-level=moderate' after install in the node job",
+    "Add pip-audit step in the python job: 'pip install pip-audit && pip-audit -r requirements.txt'",
+    "Add SBOM generation step using CycloneDX: install @cyclonedx/cyclonedx-npm and run 'pnpm dlx @cyclonedx/cyclonedx-npm --output-file sbom.json' then upload as artifact",
+    "Update .husky/pre-commit to also run typecheck on staged files via lint-staged (already handled by lint-staged config)",
+    "Add a 'security' script to root package.json: 'pnpm audit --audit-level=moderate'"
+  ],
+  "acceptance_criteria": [
+    "CI workflow includes pnpm caching with cache hit/miss",
+    "CI has a gitleaks secret scanning step",
+    "CI runs pnpm audit for Node dependency vulnerabilities",
+    "CI runs pip-audit for Python dependency vulnerabilities",
+    "CI generates a CycloneDX SBOM artifact",
+    "Root package.json has a 'security' script"
+  ],
+  "verification": [
+    "cat .github/workflows/ci.yml and verify all jobs/steps are present",
+    "pnpm run lint",
+    "pnpm run typecheck"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
