@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "chore",
   "description": "Enhance GitHub Actions CI pipeline (Task 1.3) and add pre-commit security gates (Task 1.4). Update the existing ci.yml with proper caching, add secret scanning with gitleaks, dependency vulnerability scanning, and SBOM generation.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Update .github/workflows/ci.yml to add pnpm store caching using actions/cache with key based on pnpm-lock.yaml hash",
     "Add security scanning job to CI: install and run gitleaks via docker action (gitleaks/gitleaks-action@v2) on all PRs",
@@ -26,5 +26,5 @@
     "pnpm run typecheck"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "CI enhanced with pnpm store caching (actions/cache@v4), gitleaks secret scanning job (gitleaks-action@v2), pnpm audit in node job, pip-audit in python job, and CycloneDX SBOM generation with artifact upload. Added 'security' script to root package.json. Pre-commit hook already runs lint-staged which handles eslint+prettier. All lint/typecheck pass clean."
 }
