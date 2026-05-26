@@ -49,9 +49,10 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ZodValidationPipe(refreshSchema))
-  async logout(@Body() dto: RefreshDto): Promise<void> {
-    await this.authService.logout(dto.refreshToken);
+  async logout(@Body() dto: RefreshDto, @Req() req: AuthenticatedRequest): Promise<void> {
+    await this.authService.logout(dto.refreshToken, req.user.userId);
   }
 
   @Get('me')

@@ -95,7 +95,7 @@ export interface User {
   id: string;
   email: string;
   displayName: string;
-  role: 'user' | 'admin';
+  role: 'listener' | 'enthusiast' | 'power_user' | 'admin';
   avatarUrl: string | null;
   mfaEnabled: boolean;
   createdAt: Date;

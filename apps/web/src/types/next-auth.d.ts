@@ -5,14 +5,15 @@ declare module 'next-auth' {
   interface Session {
     accessToken: string;
     userId: string;
-    role: 'user' | 'admin';
+    role: 'listener' | 'enthusiast' | 'power_user' | 'admin';
+    error?: 'RefreshAccessTokenError';
   }
 
   interface User {
     accessToken: string;
     refreshToken: string;
     userId: string;
-    role: 'user' | 'admin';
+    role: 'listener' | 'enthusiast' | 'power_user' | 'admin';
   }
 }
 
@@ -21,7 +22,8 @@ declare module 'next-auth/jwt' {
     accessToken: string;
     refreshToken: string;
     userId: string;
-    role: 'user' | 'admin';
+    role: 'listener' | 'enthusiast' | 'power_user' | 'admin';
     expiresAt: number;
+    error?: 'RefreshAccessTokenError';
   }
 }

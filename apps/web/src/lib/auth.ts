@@ -57,8 +57,9 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = refreshed.accessToken;
         token.refreshToken = refreshed.refreshToken;
         token.expiresAt = Date.now() + 14 * 60 * 1000;
+        token.error = undefined;
       } catch {
-        // Refresh failed - token will be stale, user will need to re-login
+        token.error = 'RefreshAccessTokenError';
       }
 
       return token;
@@ -67,6 +68,9 @@ export const authOptions: NextAuthOptions = {
       session.accessToken = token.accessToken;
       session.userId = token.userId;
       session.role = token.role;
+      if (token.error) {
+        session.error = token.error;
+      }
       return session;
     },
   },

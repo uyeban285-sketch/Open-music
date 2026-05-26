@@ -90,7 +90,7 @@ export const userSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   displayName: z.string(),
-  role: z.enum(['user', 'admin']),
+  role: z.enum(['listener', 'enthusiast', 'power_user', 'admin']),
   avatarUrl: z.string().url().nullable(),
   mfaEnabled: z.boolean(),
   createdAt: z.coerce.date(),

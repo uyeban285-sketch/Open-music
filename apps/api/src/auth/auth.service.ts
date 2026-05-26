@@ -1,5 +1,6 @@
 import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,16 +21,6 @@ export class AuthService {
   ) {}
 
   async register(email: string, password: string, displayName: string): Promise<TokensResponse> {
-    const existing = await this.prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      throw new ConflictException({
-        type: 'https://httpstatuses.com/409',
-        title: 'Conflict',
-        status: 409,
-        detail: 'A user with this email already exists',
-      });
-    }
-
     const passwordHash = await argon2.hash(password, {
       type: argon2.argon2id,
       memoryCost: 65536,
@@ -37,9 +28,22 @@ export class AuthService {
       parallelism: 1,
     });
 
-    const user = await this.prisma.user.create({
-      data: { email, passwordHash, displayName },
-    });
+    let user;
+    try {
+      user = await this.prisma.user.create({
+        data: { email, passwordHash, displayName },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException({
+          type: 'https://httpstatuses.com/409',
+          title: 'Conflict',
+          status: 409,
+          detail: 'A user with this email already exists',
+        });
+      }
+      throw error;
+    }
 
     return this.generateTokens(user.id, user.role);
   }
@@ -97,8 +101,19 @@ export class AuthService {
     return this.generateTokens(user.id, user.role);
   }
 
-  async logout(refreshToken: string): Promise<void> {
+  async logout(refreshToken: string, userId: string): Promise<void> {
     const key = `refresh:${refreshToken}`;
+    const tokenUserId = await this.redis.get(key);
+
+    if (tokenUserId && tokenUserId !== userId) {
+      throw new UnauthorizedException({
+        type: 'https://httpstatuses.com/401',
+        title: 'Unauthorized',
+        status: 401,
+        detail: 'Refresh token does not belong to the authenticated user',
+      });
+    }
+
     await this.redis.del(key);
   }
 

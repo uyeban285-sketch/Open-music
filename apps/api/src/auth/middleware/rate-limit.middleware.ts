@@ -16,10 +16,13 @@ export class LoginRateLimitMiddleware implements NestMiddleware {
     const email = (req.body as { email?: string })?.email ?? 'unknown';
     const key = `rate_limit:login:${ip}:${email}`;
 
-    const current = await this.redis.get(key);
-    const attempts = current ? parseInt(current, 10) : 0;
+    const current = await this.redis.incr(key);
 
-    if (attempts >= MAX_ATTEMPTS) {
+    if (current === 1) {
+      await this.redis.expire(key, WINDOW_SECONDS);
+    }
+
+    if (current > MAX_ATTEMPTS) {
       throw new HttpException(
         {
           type: 'https://httpstatuses.com/429',
@@ -30,11 +33,6 @@ export class LoginRateLimitMiddleware implements NestMiddleware {
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
-
-    const multi = this.redis.multi();
-    multi.incr(key);
-    multi.expire(key, WINDOW_SECONDS);
-    await multi.exec();
 
     next();
   }
