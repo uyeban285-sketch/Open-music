@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
+import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { LoginRateLimitMiddleware } from './auth/middleware/rate-limit.middleware';
 import { envSchema } from './config/env.schema';
@@ -10,6 +11,7 @@ import { HealthModule } from './health/health.module';
 import { KmsModule } from './kms/kms.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { TokenVaultModule } from './token-vault/token-vault.module';
 
 function validate(config: Record<string, unknown>): Record<string, unknown> {
   const result = envSchema.safeParse(config);
@@ -37,7 +39,9 @@ function validate(config: Record<string, unknown>): Record<string, unknown> {
     PrismaModule,
     RedisModule,
     KmsModule,
+    AuditModule,
     AuthModule,
+    TokenVaultModule,
   ],
 })
 export class AppModule implements NestModule {
