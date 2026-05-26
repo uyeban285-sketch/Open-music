@@ -1,0 +1,31 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement settings module (Task 19.1): REST endpoints for user settings and privacy preferences. Settings include source-priority, theme, density, equalizer mode/intensity, dynamic palette, AAA contrast. Privacy settings stored in PrivacySetting model (key-value per user).",
+  "status": "completed",
+  "steps": [
+    "Create apps/api/src/settings/settings.service.ts with methods: getSettings(userId) returns all privacy settings as key-value map, updateSettings(userId, settings: Record<string, string>) upserts PrivacySetting records, getPrivacy(userId) returns privacy-specific settings, updatePrivacy(userId, privacy: Record<string, string>) upserts privacy settings",
+    "Create apps/api/src/settings/settings.controller.ts with JWT-protected routes: GET /settings (returns all user settings), PATCH /settings (updates settings), GET /settings/privacy (returns privacy settings), PATCH /settings/privacy (updates privacy settings)",
+    "Create apps/api/src/settings/settings.module.ts providing SettingsService",
+    "Wire SettingsModule into AppModule",
+    "Create apps/api/src/settings/__tests__/settings.service.spec.ts testing getSettings, updateSettings (upserts correctly)",
+    "Run pnpm run typecheck, pnpm run lint, pnpm run build, pnpm run test"
+  ],
+  "acceptance_criteria": [
+    "GET /settings returns user settings as key-value map",
+    "PATCH /settings upserts settings",
+    "GET /settings/privacy returns privacy-specific settings",
+    "PATCH /settings/privacy upserts privacy settings",
+    "All endpoints are JWT-protected",
+    "Tests pass",
+    "pnpm run typecheck passes"
+  ],
+  "verification": [
+    "pnpm --filter @open-music/api run test",
+    "pnpm run typecheck",
+    "pnpm run lint",
+    "pnpm run build"
+  ],
+  "blocked_reason": null,
+  "findings": "All verification passed: tests (132 pass), typecheck, lint, build all clean. Used same patterns as library module (controller with @Inject, JwtAuthGuard at class level, AuthenticatedRequest interface, direct service instantiation in tests with mock prisma)."
+}
