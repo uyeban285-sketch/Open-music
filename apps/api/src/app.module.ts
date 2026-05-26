@@ -1,11 +1,15 @@
+import type { MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 
+import { AuthModule } from './auth/auth.module';
+import { LoginRateLimitMiddleware } from './auth/middleware/rate-limit.middleware';
 import { envSchema } from './config/env.schema';
 import { HealthModule } from './health/health.module';
 import { KmsModule } from './kms/kms.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
 
 function validate(config: Record<string, unknown>): Record<string, unknown> {
   const result = envSchema.safeParse(config);
@@ -31,7 +35,13 @@ function validate(config: Record<string, unknown>): Record<string, unknown> {
     }),
     HealthModule,
     PrismaModule,
+    RedisModule,
     KmsModule,
+    AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(LoginRateLimitMiddleware).forRoutes('auth/login');
+  }
+}
