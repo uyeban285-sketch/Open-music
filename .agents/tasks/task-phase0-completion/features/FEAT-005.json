@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "feat",
   "description": "Initialize Next.js 14 with App Router, Tailwind, dark theme (Task 5.1) and type-safe API client (Task 5.2) in apps/web.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Update apps/web/package.json: add dependencies next@14, react@18, react-dom@18, @tanstack/react-query, zustand, tailwindcss, postcss, autoprefixer, next-auth, @open-music/shared workspace:*. DevDeps: @types/react, @types/react-dom",
     "Create apps/web/next.config.mjs with transpilePackages: ['@open-music/shared'], output: 'standalone'",
@@ -29,5 +29,5 @@
   ],
   "verification": ["pnpm run typecheck", "pnpm run lint", "pnpm run build"],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Next.js build auto-modifies tsconfig.json to add allowJs:true and .next/types/**/*.ts to include. It also generates next-env.d.ts. Pre-commit hooks (lint-staged) ran successfully on all staged files. Build output mode is standalone."
 }

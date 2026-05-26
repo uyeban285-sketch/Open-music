@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Create shared TypeScript interfaces for Connector system (Task 3.1), DTO domain models with Zod schemas (Task 3.2), and AI module interfaces (Task 3.3) in packages/shared.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Add 'zod' as a dependency in packages/shared/package.json",
     "Create packages/shared/src/connectors/types.ts with interfaces: ConnectorId (branded string type), ConnectionStatus enum (Connected, Disconnected, Error, Token_Expired, Reauth_Required), ConnectorManifest (id, name, description, icon, authMethod, capabilities, rateLimits), ExternalTrack (externalId, connectorId, title, artist, album, duration, coverUrl, isrc, availability, explicit, isLive, genre), ExternalPlaylist (externalId, connectorId, name, owner, trackCount), TokenBundle (accessToken, refreshToken, expiresAt, scope), Page<T> (items, cursor, hasMore, total), ConnectorCtx (userId, connectionId, tokens), PlaybackHandle (streamUrl, format, expiresAt), Lyrics (lines with timestamps)",
@@ -26,5 +26,5 @@
   ],
   "verification": ["pnpm run typecheck", "pnpm run lint", "pnpm run build"],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Had to install eslint-import-resolver-typescript as a root devDependency - it was referenced in .eslintrc.cjs settings but missing from package.json. This was a pre-existing gap that only manifested once actual imports existed. All typecheck/lint/build pass. Pre-commit hook (lint-staged) ran prettier+eslint fix on staged files successfully."
 }
