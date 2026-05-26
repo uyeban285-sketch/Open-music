@@ -70,10 +70,11 @@ export const authApi = {
     });
   },
 
-  logout(refreshToken: string) {
+  logout(refreshToken: string, accessToken: string) {
     return apiFetch<void>('/api/auth/logout', {
       method: 'POST',
       body: { refreshToken },
+      accessToken,
     });
   },
 

@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+
 import type { NestMiddleware } from '@nestjs/common';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
@@ -6,6 +8,7 @@ import { RedisService } from '../../redis/redis.service';
 
 const MAX_ATTEMPTS = 5;
 const WINDOW_SECONDS = 15 * 60; // 15 minutes
+const MAX_EMAIL_LENGTH = 254;
 
 @Injectable()
 export class LoginRateLimitMiddleware implements NestMiddleware {
@@ -13,8 +16,12 @@ export class LoginRateLimitMiddleware implements NestMiddleware {
 
   async use(req: Request, _res: Response, next: NextFunction): Promise<void> {
     const ip = req.ip ?? req.socket.remoteAddress ?? 'unknown';
-    const email = (req.body as { email?: string })?.email ?? 'unknown';
-    const key = `rate_limit:login:${ip}:${email}`;
+    const rawEmail = (req.body as { email?: string })?.email ?? 'unknown';
+    const emailComponent =
+      rawEmail.length > MAX_EMAIL_LENGTH
+        ? 'invalid'
+        : createHash('sha256').update(rawEmail).digest('hex').slice(0, 16);
+    const key = `rate_limit:login:${ip}:${emailComponent}`;
 
     const current = await this.redis.incr(key);
 

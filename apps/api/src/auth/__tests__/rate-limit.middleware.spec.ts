@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -7,6 +9,10 @@ const mockRedis = {
   incr: vi.fn(),
   expire: vi.fn(),
 };
+
+function hashEmail(email: string): string {
+  return createHash('sha256').update(email).digest('hex').slice(0, 16);
+}
 
 function createRequest(ip: string, email: string) {
   return {
@@ -33,7 +39,9 @@ describe('LoginRateLimitMiddleware', () => {
     await middleware.use(createRequest('127.0.0.1', 'user@example.com'), mockRes, next);
 
     expect(next).toHaveBeenCalled();
-    expect(mockRedis.incr).toHaveBeenCalledWith('rate_limit:login:127.0.0.1:user@example.com');
+    expect(mockRedis.incr).toHaveBeenCalledWith(
+      `rate_limit:login:127.0.0.1:${hashEmail('user@example.com')}`,
+    );
     expect(mockRedis.expire).not.toHaveBeenCalled();
   });
 
@@ -45,7 +53,7 @@ describe('LoginRateLimitMiddleware', () => {
 
     expect(next).toHaveBeenCalled();
     expect(mockRedis.expire).toHaveBeenCalledWith(
-      'rate_limit:login:127.0.0.1:user@example.com',
+      `rate_limit:login:127.0.0.1:${hashEmail('user@example.com')}`,
       900,
     );
   });
@@ -93,5 +101,26 @@ describe('LoginRateLimitMiddleware', () => {
 
     expect(next1).not.toHaveBeenCalled();
     expect(next2).toHaveBeenCalled();
+  });
+
+  it('uses "invalid" for emails longer than 254 characters', async () => {
+    mockRedis.incr.mockResolvedValue(1);
+    const next = vi.fn();
+    const longEmail = 'a'.repeat(255) + '@example.com';
+
+    await middleware.use(createRequest('127.0.0.1', longEmail), mockRes, next);
+
+    expect(mockRedis.incr).toHaveBeenCalledWith('rate_limit:login:127.0.0.1:invalid');
+    expect(next).toHaveBeenCalled();
+  });
+
+  it('hashes the email component of the key', async () => {
+    mockRedis.incr.mockResolvedValue(1);
+    const next = vi.fn();
+
+    await middleware.use(createRequest('192.168.1.1', 'test@domain.com'), mockRes, next);
+
+    const expectedHash = hashEmail('test@domain.com');
+    expect(mockRedis.incr).toHaveBeenCalledWith(`rate_limit:login:192.168.1.1:${expectedHash}`);
   });
 });
