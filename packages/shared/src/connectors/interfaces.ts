@@ -8,7 +8,7 @@ import type {
   Page,
   PlaybackHandle,
   TokenBundle,
-} from './types.js';
+} from './types';
 
 export interface MusicConnector {
   readonly manifest: ConnectorManifest;

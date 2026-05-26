@@ -1,0 +1,29 @@
+{
+  "id": "FEAT-007",
+  "type": "feat",
+  "description": "Implement NextAuth on frontend (Task 6.2) and Login/Register UI screens (Task 6.3).",
+  "status": "in_progress",
+  "steps": [
+    "Create apps/web/src/app/api/auth/[...nextauth]/route.ts with NextAuth configuration using CredentialsProvider that calls the backend POST /auth/login endpoint, stores JWT in session",
+    "Create apps/web/src/lib/auth.ts exporting authOptions with session callback that includes userId, role, accessToken in the session, and jwt callback that handles token refresh logic",
+    "Create apps/web/src/providers/session-provider.tsx wrapping next-auth SessionProvider",
+    "Update apps/web/src/app/layout.tsx to include SessionProvider",
+    "Create apps/web/src/app/(auth)/login/page.tsx with login form: email + password inputs, Zod client-side validation, error display using ProblemDetails format, submit calls signIn('credentials'), redirects to / on success",
+    "Create apps/web/src/app/(auth)/register/page.tsx with registration form: email + password + displayName, validates with Zod, calls backend /auth/register directly, on success auto-logs in and redirects to onboarding placeholder",
+    "Create apps/web/src/app/(auth)/layout.tsx with centered card layout for auth pages, dark theme styling",
+    "Create apps/web/src/middleware.ts for route protection: redirect unauthenticated users from protected routes to /login, redirect authenticated users from /login and /register to /",
+    "Run pnpm install, then pnpm run typecheck and pnpm run lint to verify"
+  ],
+  "acceptance_criteria": [
+    "NextAuth is configured with CredentialsProvider hitting backend /auth/login",
+    "Session includes accessToken, userId, role",
+    "Login page has email/password form with Zod validation and error display",
+    "Register page has email/password/displayName form with Zod validation",
+    "Middleware protects routes and redirects appropriately",
+    "pnpm run typecheck passes",
+    "pnpm run lint passes"
+  ],
+  "verification": ["pnpm run typecheck", "pnpm run lint", "pnpm run build"],
+  "blocked_reason": null,
+  "findings": ""
+}

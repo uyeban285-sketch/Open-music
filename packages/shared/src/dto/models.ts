@@ -1,4 +1,4 @@
-import type { ConnectorId } from '../connectors/types.js';
+import type { ConnectorId } from '../connectors/types';
 
 export interface InternalTrack {
   id: string;

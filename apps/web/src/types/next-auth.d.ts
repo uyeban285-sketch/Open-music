@@ -1,0 +1,27 @@
+import 'next-auth';
+import 'next-auth/jwt';
+
+declare module 'next-auth' {
+  interface Session {
+    accessToken: string;
+    userId: string;
+    role: 'user' | 'admin';
+  }
+
+  interface User {
+    accessToken: string;
+    refreshToken: string;
+    userId: string;
+    role: 'user' | 'admin';
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    accessToken: string;
+    refreshToken: string;
+    userId: string;
+    role: 'user' | 'admin';
+    expiresAt: number;
+  }
+}
