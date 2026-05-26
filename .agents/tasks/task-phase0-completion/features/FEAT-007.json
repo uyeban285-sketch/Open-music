@@ -2,7 +2,7 @@
   "id": "FEAT-007",
   "type": "feat",
   "description": "Implement NextAuth on frontend (Task 6.2) and Login/Register UI screens (Task 6.3).",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create apps/web/src/app/api/auth/[...nextauth]/route.ts with NextAuth configuration using CredentialsProvider that calls the backend POST /auth/login endpoint, stores JWT in session",
     "Create apps/web/src/lib/auth.ts exporting authOptions with session callback that includes userId, role, accessToken in the session, and jwt callback that handles token refresh logic",
@@ -25,5 +25,5 @@
   ],
   "verification": ["pnpm run typecheck", "pnpm run lint", "pnpm run build"],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "Had to remove .js extensions from shared package imports (index.ts, connectors/interfaces.ts, dto/models.ts) because Next.js webpack with transpilePackages cannot resolve .js extensions to .ts source files. This is a pre-existing issue that only surfaces when code actually imports from @open-music/shared in a page that gets built. Also renamed CredentialsProvider import to 'Credentials' to avoid import/no-named-as-default eslint warning."
 }
