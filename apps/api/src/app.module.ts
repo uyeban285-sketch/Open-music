@@ -11,6 +11,7 @@ import { ConnectorsModule } from './connectors/connectors.module';
 import { HealthModule } from './health/health.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { KmsModule } from './kms/kms.module';
+import { LibraryModule } from './library/library.module';
 import { MatchingModule } from './matching/matching.module';
 import { PlaybackModule } from './playback/playback.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -48,6 +49,7 @@ function validate(config: Record<string, unknown>): Record<string, unknown> {
     TokenVaultModule,
     ConnectorsModule,
     IntegrationsModule,
+    LibraryModule,
     MatchingModule,
     PlaybackModule,
   ],
