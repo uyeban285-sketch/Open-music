@@ -1,0 +1,7 @@
+{
+  "task_id": "task-phase1-track-matching",
+  "task_description": "Phase 1 Task 15 (partial): Track matching pipeline - normalization, confidence scoring, and matching service with live/explicit guards",
+  "status": "completed",
+  "feature_order": ["FEAT-001"],
+  "blocked_reason": null
+}

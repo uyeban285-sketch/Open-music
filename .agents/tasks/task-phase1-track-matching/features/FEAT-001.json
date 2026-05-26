@@ -1,0 +1,38 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement track normalization (Task 15.1) and match confidence scoring (Task 15.2) as pure functions, plus the MatchingService (Task 15.3) with live/explicit guard and decision logic. These are pure business logic functions with comprehensive unit tests.",
+  "status": "completed",
+  "steps": [
+    "Create apps/api/src/matching/normalize.ts - pure function normalize(input: string): string that: NFD decompose + remove diacritics (combining marks), lowercase, remove content in parentheses and brackets ((...) [...]), unify 'feat.'/'ft.'/'featuring' to 'feat', remove Unicode punctuation, collapse whitespace. Also export extractAnnotations(input: string): { cleaned: string, isLive: boolean, explicit: boolean, acoustic: boolean } that extracts info from removed bracket content before cleaning.",
+    "Create apps/api/src/matching/confidence.ts - pure function computeConfidence(trackA: TrackInfo, trackB: TrackInfo): { confidence: number, signals: Record<string,number> }. TrackInfo: { title: string, artist: string, album?: string, duration: number, isrc?: string, isLive: boolean, explicit: boolean }. Logic: (1) if both have ISRC and they match: base 0.95, +0.05 if normalized title+artist also match (>=0.9 Jaro-Winkler); (2) without ISRC match: 0.45*titleSim + 0.30*artistSim + 0.15*durationSim + 0.10*albumSim. titleSim/artistSim use Jaro-Winkler on normalized strings. durationSim = 1 - min(abs(dA-dB)/3, 1) (0 if >3 sec diff). albumSim: Jaro-Winkler if both present, 0 otherwise.",
+    "Implement Jaro-Winkler similarity as a helper in apps/api/src/matching/jaro-winkler.ts (pure function, no external deps needed - it's a simple string distance algorithm)",
+    "Create apps/api/src/matching/matching.service.ts - NestJS Injectable with: decide(trackA: TrackInfo, trackB: TrackInfo): { confidence: number, status: 'auto_merged'|'probable_pending'|'no_link', signals: Record<string,number>, blocked?: string }. Logic: (1) Live/explicit guard: if isLive_a !== isLive_b OR explicit_a !== explicit_b, block auto_merge (status max is probable_pending regardless of confidence). (2) Apply thresholds: >=0.9 auto_merged, [0.5,0.9) probable_pending, <0.5 no_link.",
+    "Create apps/api/src/matching/matching.module.ts providing MatchingService",
+    "Wire MatchingModule into AppModule",
+    "Create apps/api/src/matching/__tests__/normalize.spec.ts testing: idempotency, diacritic removal, bracket removal, feat unification, annotation extraction",
+    "Create apps/api/src/matching/__tests__/jaro-winkler.spec.ts testing: identical strings = 1.0, completely different = 0.0, known pairs with expected values",
+    "Create apps/api/src/matching/__tests__/confidence.spec.ts testing: ISRC match gives >=0.95, identical tracks give ~1.0, different tracks give low score, duration difference >3s penalizes",
+    "Create apps/api/src/matching/__tests__/matching.service.spec.ts testing: auto_merge at >=0.9, probable_pending at [0.5,0.9), no_link at <0.5, live guard blocks auto_merge, explicit guard blocks auto_merge",
+    "Run pnpm run typecheck, pnpm run lint, pnpm run build, pnpm run test"
+  ],
+  "acceptance_criteria": [
+    "normalize function removes diacritics, brackets, unifies feat variants",
+    "normalize is idempotent: normalize(normalize(s)) === normalize(s)",
+    "computeConfidence returns value in [0,1]",
+    "ISRC match gives confidence >= 0.9",
+    "Live/explicit guard prevents auto_merge when tracks differ on these attributes",
+    "Thresholds correctly applied: >=0.9 auto_merged, [0.5,0.9) probable_pending, <0.5 no_link",
+    "All tests pass",
+    "pnpm run typecheck passes",
+    "pnpm run lint passes"
+  ],
+  "verification": [
+    "pnpm --filter @open-music/api run test",
+    "pnpm run typecheck",
+    "pnpm run lint",
+    "pnpm run build"
+  ],
+  "blocked_reason": null,
+  "findings": "All tests pass (89/89). Typecheck, lint, and build all clean. The confidence threshold for 'completely different tracks' test needed adjustment from <0.3 to <0.5 since Jaro-Winkler gives partial similarity even for different strings (e.g., 'Bohemian Rhapsody' vs 'Smells Like Teen Spirit' share some character overlap)."
+}
