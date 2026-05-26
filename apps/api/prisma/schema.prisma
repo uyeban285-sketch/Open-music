@@ -7,12 +7,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
 enum UserRole {
   listener
   enthusiast
   power_user
   admin
 }
+
+enum ConnectionStatus {
+  connected
+  disconnected
+  error
+  token_expired
+  reauth_required
+}
+
+enum SyncJobKind {
+  full
+  incremental
+}
+
+enum SyncJobStatus {
+  pending
+  running
+  partial
+  completed
+  failed
+}
+
+enum MatchStatus {
+  auto_merged
+  probable_pending
+  no_link
+  user_confirmed
+  user_rejected
+  reverted
+}
+
+enum PlaybackState {
+  idle
+  loading
+  playing
+  paused
+  buffering
+}
+
+enum RepeatMode {
+  off
+  one
+  all
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -28,8 +76,15 @@ model User {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
-  privacySettings PrivacySetting[]
-  auditLogs       AuditLog[]
+  privacySettings   PrivacySetting[]
+  auditLogs         AuditLog[]
+  connectedServices ConnectedService[]
+  playlists         Playlist[]
+  likes             Like[]
+  playbackSession   PlaybackSession?
+  deviceSessions    DeviceSession[]
+  listeningEvents   ListeningEvent[]
+  notifications     Notification[]
 
   @@map("users")
 }
@@ -63,4 +118,273 @@ model AuditLog {
   @@index([createdAt])
   @@index([category])
   @@map("audit_logs")
+}
+
+// ─── Integration Entities ────────────────────────────────────────────────────
+
+model ConnectedService {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  connectorId    String           @map("connector_id")
+  status         ConnectionStatus @default(connected)
+  accessTokenCt  Bytes?           @map("access_token_ct")
+  refreshTokenCt Bytes?           @map("refresh_token_ct")
+  dekId          String?          @map("dek_id")
+  tokenExpiresAt DateTime?        @map("token_expires_at")
+  lastSyncedAt   DateTime?        @map("last_synced_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  syncJobs SyncJob[]
+
+  @@unique([userId, connectorId])
+  @@map("connected_services")
+}
+
+model SyncJob {
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  connectedServiceId String        @map("connected_service_id") @db.Uuid
+  kind               SyncJobKind
+  status             SyncJobStatus @default(pending)
+  progress           Json?
+  error              String?
+  startedAt          DateTime?     @map("started_at")
+  completedAt        DateTime?     @map("completed_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+
+  connectedService ConnectedService @relation(fields: [connectedServiceId], references: [id], onDelete: Cascade)
+
+  @@index([connectedServiceId, createdAt(sort: Desc)])
+  @@map("sync_jobs")
+}
+
+// ─── Media Catalog Entities ──────────────────────────────────────────────────
+
+model Track {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  canonicalTitle  String   @map("canonical_title")
+  canonicalArtist String   @map("canonical_artist")
+  albumTitle      String?  @map("album_title")
+  duration        Int
+  isrc            String?
+  genre           String[]
+  audioFeatures   Json?    @map("audio_features")
+  availability    Json?
+  isLive          Boolean  @default(false) @map("is_live")
+  explicit        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // embedding vector(1024) - added via raw SQL migration for pgvector support
+
+  externalRefs     TrackExternalRef[]
+  matchDecisionsA  MatchDecision[]    @relation("MatchTrackA")
+  matchDecisionsB  MatchDecision[]    @relation("MatchTrackB")
+  playlistTracks   PlaylistTrack[]
+  likes            Like[]
+  listeningEvents  ListeningEvent[]
+  playbackSessions PlaybackSession[]
+
+  @@index([isrc])
+  @@map("tracks")
+}
+
+model Album {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  artistName  String   @map("artist_name")
+  coverUrl    String?  @map("cover_url")
+  releaseYear Int?     @map("release_year")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("albums")
+}
+
+model Artist {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  externalIds Json?    @map("external_ids")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("artists")
+}
+
+model TrackExternalRef {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trackId          String   @map("track_id") @db.Uuid
+  connectorId      String   @map("connector_id")
+  externalId       String   @map("external_id")
+  metadataSnapshot Json?    @map("metadata_snapshot")
+  availability     String   @default("available")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([connectorId, externalId])
+  @@index([trackId])
+  @@map("track_external_refs")
+}
+
+model MatchDecision {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trackAId   String      @map("track_a_id") @db.Uuid
+  trackBId   String      @map("track_b_id") @db.Uuid
+  confidence Float
+  status     MatchStatus
+  signals    Json?
+  decidedBy  String      @map("decided_by")
+  decidedAt  DateTime    @map("decided_at")
+  revertedAt DateTime?   @map("reverted_at")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  trackA Track @relation("MatchTrackA", fields: [trackAId], references: [id], onDelete: Cascade)
+  trackB Track @relation("MatchTrackB", fields: [trackBId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([trackAId, trackBId])
+  @@map("match_decisions")
+}
+
+// ─── Playlist Entities ───────────────────────────────────────────────────────
+
+model Playlist {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  title             String
+  description       String?
+  isImported        Boolean  @default(false) @map("is_imported")
+  sourceConnectorId String?  @map("source_connector_id")
+  sourceExternalId  String?  @map("source_external_id")
+  coverUrl          String?  @map("cover_url")
+  trackCount        Int      @default(0) @map("track_count")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlistTracks PlaylistTrack[]
+
+  @@index([userId])
+  @@map("playlists")
+}
+
+model PlaylistTrack {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  playlistId String   @map("playlist_id") @db.Uuid
+  trackId    String   @map("track_id") @db.Uuid
+  position   Int
+  addedAt    DateTime @default(now()) @map("added_at")
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, trackId])
+  @@index([playlistId, position])
+  @@map("playlist_tracks")
+}
+
+model Like {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  trackId   String   @map("track_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trackId])
+  @@index([userId])
+  @@map("likes")
+}
+
+// ─── Playback Entities ───────────────────────────────────────────────────────
+
+model PlaybackSession {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String        @unique @map("user_id") @db.Uuid
+  revision       BigInt        @default(0)
+  state          PlaybackState @default(idle)
+  currentTrackId String?       @map("current_track_id") @db.Uuid
+  positionMs     Int           @default(0) @map("position_ms")
+  queue          Json          @default("[]")
+  shuffle        Boolean       @default(false)
+  repeatMode     RepeatMode    @default(off) @map("repeat_mode")
+  volume         Int           @default(100)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentTrack   Track?          @relation(fields: [currentTrackId], references: [id], onDelete: SetNull)
+  deviceSessions DeviceSession[]
+
+  @@map("playback_sessions")
+}
+
+model DeviceSession {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  playbackSessionId String?  @map("playback_session_id") @db.Uuid
+  deviceName        String   @map("device_name")
+  deviceType        String   @map("device_type")
+  isActive          Boolean  @default(true) @map("is_active")
+  lastSeenAt        DateTime @map("last_seen_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playbackSession PlaybackSession? @relation(fields: [playbackSessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isActive])
+  @@map("device_sessions")
+}
+
+model ListeningEvent {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  trackId     String    @map("track_id") @db.Uuid
+  connectorId String?   @map("connector_id")
+  startedAt   DateTime  @map("started_at")
+  endedAt     DateTime? @map("ended_at")
+  durationMs  Int?      @map("duration_ms")
+  private     Boolean   @default(false)
+  skipReason  String?   @map("skip_reason")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@index([startedAt])
+  @@index([userId])
+  @@map("listening_events")
+}
+
+// ─── System Entities ─────────────────────────────────────────────────────────
+
+model Notification {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  type      String
+  title     String
+  body      String?
+  metadata  Json?
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model FeatureFlag {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key               String   @unique
+  enabled           Boolean  @default(false)
+  rolloutPercentage Int      @default(0) @map("rollout_percentage")
+  metadata          Json?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("feature_flags")
 }
