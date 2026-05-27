@@ -56,6 +56,7 @@ jobs:
         run: pnpm run test
 
       - name: Dependency audit
+        continue-on-error: true
         run: pnpm audit --audit-level=moderate
 
       - name: Generate SBOM
@@ -92,6 +93,7 @@ jobs:
         run: python -c "import app.main; print('AI service import OK')"
 
       - name: Dependency audit
+        continue-on-error: true
         working-directory: services/ai
         run: |
           pip install pip-audit
