@@ -36,7 +36,7 @@ importers:
         specifier: ^3.3.3
         version: 3.8.3
       typescript:
-        specifier: ^5.5.4
+        specifier: 5.9.3
         version: 5.9.3
 
   apps/api:
@@ -58,7 +58,7 @@ importers:
         specifier: ^20.14.10
         version: 20.19.41
       typescript:
-        specifier: ^5.5.4
+        specifier: 5.9.3
         version: 5.9.3
 
   apps/web:
@@ -71,7 +71,7 @@ importers:
         specifier: ^20.14.10
         version: 20.19.41
       typescript:
-        specifier: ^5.5.4
+        specifier: 5.9.3
         version: 5.9.3
 
   packages/connectors/file-import:
@@ -81,7 +81,7 @@ importers:
         version: link:../../shared
     devDependencies:
       typescript:
-        specifier: ^5.5.4
+        specifier: 5.9.3
         version: 5.9.3
 
   packages/connectors/yandex-music:
@@ -91,7 +91,7 @@ importers:
         version: link:../../shared
     devDependencies:
       typescript:
-        specifier: ^5.5.4
+        specifier: 5.9.3
         version: 5.9.3
 
   packages/connectors/youtube-music:
@@ -101,13 +101,13 @@ importers:
         version: link:../../shared
     devDependencies:
       typescript:
-        specifier: ^5.5.4
+        specifier: 5.9.3
         version: 5.9.3
 
   packages/shared:
     devDependencies:
       typescript:
-        specifier: ^5.5.4
+        specifier: 5.9.3
         version: 5.9.3
 
   services/ai: {}
