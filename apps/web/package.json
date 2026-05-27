@@ -4,8 +4,9 @@
   "private": true,
   "description": "Open Music web frontend (Next.js)",
   "scripts": {
-    "build": "echo \"web build will be wired up in task 12.1\"",
-    "dev": "echo \"web dev will be wired up in task 12.1\"",
+    "build": "echo \"web build will be wired up in task 5.1\"",
+    "dev": "echo \"web dev will be wired up in task 5.1\"",
+    "start": "echo \"web start will be wired up in task 5.1\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src --ext .ts,.tsx --max-warnings=0",
     "test": "echo \"no tests yet\""
@@ -15,6 +16,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
-    "typescript": "^5.5.4"
+    "typescript": "5.9.3"
   }
 }

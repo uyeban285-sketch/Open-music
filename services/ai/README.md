@@ -7,8 +7,8 @@ AI-сервис Open Music (FastAPI, Python 3.11). Каркас под Phase 2 �
 ```bash
 cd services/ai
 python -m venv .venv
-. .venv/Scripts/activate    # Windows
-# source .venv/bin/activate # macOS/Linux
+source .venv/bin/activate    # macOS/Linux
+# .venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8001
 ```
