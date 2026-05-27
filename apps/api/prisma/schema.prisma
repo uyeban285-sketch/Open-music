@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  listener
+  enthusiast
+  power_user
+  admin
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  email          String    @unique @db.Citext
+  passwordHash   String?   @map("password_hash")
+  ssoProvider    String?   @map("sso_provider")
+  role           UserRole  @default(listener)
+  mfaEnabled     Boolean   @default(false) @map("mfa_enabled")
+  mfaSecret      String?   @map("mfa_secret")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
+  version        Int       @default(0)
+
+  privacySetting PrivacySetting?
+  auditLogs      AuditLog[]
+
+  @@index([email])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model PrivacySetting {
+  userId                  String   @id @map("user_id") @db.Uuid
+  useHistoryForReco       Boolean  @default(true) @map("use_history_for_reco")
+  useCloudAi              Boolean  @default(true) @map("use_cloud_ai")
+  productAnalyticsEnabled Boolean  @default(true) @map("product_analytics_enabled")
+  marketingNotifications  Boolean  @default(false) @map("marketing_notifications")
+  disabledSignalSources   String[] @map("disabled_signal_sources")
+  privateModeDefault      Boolean  @default(false) @map("private_mode_default")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("privacy_settings")
+}
+
+enum AuditAction {
+  login_success
+  login_failure
+  mfa_enrolled
+  mfa_verified
+  token_issued
+  token_revoked
+  data_exported
+  data_deleted
+  cross_tenant_attempt
+  admin_action
+}
+
+model AuditLog {
+  id        String      @id @default(uuid()) @db.Uuid
+  userId    String?     @map("user_id") @db.Uuid
+  action    AuditAction
+  resource  String?
+  ipAddress String?     @map("ip_address")
+  userAgent String?     @map("user_agent")
+  metadata  Json?
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
