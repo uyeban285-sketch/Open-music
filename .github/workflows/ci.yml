@@ -29,8 +29,19 @@ jobs:
           node-version: 20
           cache: pnpm
 
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store/v3
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @open-music/api run db:generate
 
       - name: Lint
         run: pnpm run lint
@@ -46,6 +57,19 @@ jobs:
 
       - name: Test
         run: pnpm run test
+
+      - name: Dependency audit
+        continue-on-error: true
+        run: pnpm audit --audit-level=moderate
+
+      - name: Generate SBOM
+        run: pnpm dlx @cyclonedx/cyclonedx-npm --output-file sbom.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
 
   python:
     name: Python (services/ai) — lint, typecheck
@@ -70,3 +94,24 @@ jobs:
       - name: Smoke import
         working-directory: services/ai
         run: python -c "import app.main; print('AI service import OK')"
+
+      - name: Dependency audit
+        continue-on-error: true
+        working-directory: services/ai
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt
+
+  security:
+    name: Security — secret scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks secret scanning
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

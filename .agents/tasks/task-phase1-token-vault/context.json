@@ -1,0 +1,23 @@
+{
+  "project_type": "TypeScript monorepo - multi-source music aggregator with NestJS backend",
+  "language": "TypeScript",
+  "build_system": "pnpm workspaces (9.15.0), tsc for individual packages",
+  "test_framework": "vitest for apps/api unit tests, unplugin-swc for decorator support",
+  "build_command": "pnpm run build",
+  "test_command": "pnpm run test",
+  "verification_instructions": "1. pnpm run lint, 2. pnpm run typecheck, 3. pnpm run build, 4. pnpm run test",
+  "snapshot_or_generated_files": "Prisma client generated via prisma generate",
+  "setup_instructions": "pnpm install",
+  "environment_constraints": "OPEN_INTERNET. Node.js 22. No running DB in sandbox.",
+  "contribution_requirements": "Conventional Commits, ESLint + Prettier enforced, strict TypeScript",
+  "key_patterns": "KmsService already exists at apps/api/src/kms/kms.service.ts with KmsClient interface (encrypt, decrypt, generateDataKey). KmsModule is already imported in AppModule. PrismaService is global. RedisService extends ioredis. AuditLog model exists in Prisma schema. ConnectedService model has accessTokenCt, refreshTokenCt, dekId fields.",
+  "relevant_files": [
+    "apps/api/src/kms/kms.service.ts",
+    "apps/api/src/kms/kms.module.ts",
+    "apps/api/src/prisma/prisma.service.ts",
+    "apps/api/src/app.module.ts",
+    "apps/api/prisma/schema.prisma",
+    "apps/api/src/auth/auth.service.ts"
+  ],
+  "directory_structure": "apps/api/src/ contains modules: auth, common, config, health, kms, prisma, redis"
+}

@@ -1,0 +1,21 @@
+{
+  "project_type": "TypeScript monorepo - NestJS backend",
+  "language": "TypeScript",
+  "build_system": "pnpm workspaces, tsc",
+  "test_framework": "vitest with unplugin-swc",
+  "build_command": "pnpm run build",
+  "test_command": "pnpm run test",
+  "verification_instructions": "pnpm run lint, pnpm run typecheck, pnpm run build, pnpm run test",
+  "snapshot_or_generated_files": "Prisma client via prisma generate",
+  "setup_instructions": "pnpm install",
+  "environment_constraints": "OPEN_INTERNET. Node.js 22. No running DB.",
+  "contribution_requirements": "Conventional Commits, ESLint + Prettier, strict TypeScript",
+  "key_patterns": "Track model in Prisma with canonicalTitle, canonicalArtist, duration, isrc, isLive, explicit. MatchDecision model with confidence, status (auto_merged/probable_pending/no_link/user_confirmed/user_rejected/reverted), signals, decidedBy, decidedAt. TrackExternalRef links tracks to external service IDs.",
+  "relevant_files": [
+    "apps/api/prisma/schema.prisma",
+    "apps/api/src/app.module.ts",
+    "packages/shared/src/connectors/types.ts",
+    "packages/shared/src/dto/models.ts"
+  ],
+  "directory_structure": "apps/api/src/ modules: auth, audit, common, config, connectors, health, integrations, kms, prisma, redis, token-vault"
+}

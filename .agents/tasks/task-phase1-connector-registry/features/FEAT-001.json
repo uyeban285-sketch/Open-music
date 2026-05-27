@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement ConnectorRegistry in NestJS (Task 11.1) and the integrations module with connection management endpoints (Task 11.2). The registry holds all registered MusicConnector instances. The integrations module provides REST endpoints for listing connectors, managing connections (connect/disconnect/reauth), and triggering syncs.",
+  "status": "completed",
+  "steps": [
+    "Create apps/api/src/connectors/connector-registry.service.ts implementing the ConnectorRegistry interface from @open-music/shared: register(connector), get(id), list(), has(id). Use an internal Map<ConnectorId, MusicConnector>.",
+    "Create apps/api/src/connectors/connectors.module.ts - provides and exports ConnectorRegistryService. On module init, register stub/placeholder connectors for yandex_music, youtube_music, file_import (these will be replaced with real implementations later).",
+    "Create apps/api/src/integrations/integrations.module.ts importing ConnectorsModule, TokenVaultModule, PrismaModule, RedisModule, AuditModule",
+    "Create apps/api/src/integrations/integrations.service.ts with methods: listConnectors() -> ConnectorManifest[], listConnections(userId) -> ConnectedService[], connect(userId, connectorId) -> {redirectUrl, state} (calls connector.startAuth, stores state in Redis with TTL 10min), handleCallback(state, params) -> ConnectedService (validates state, calls connector.handleCallback, wraps tokens via TokenVault, creates ConnectedService record), disconnect(userId, connectionId) -> void (deletes ConnectedService, revokes tokens), getConnection(userId, connectionId) -> ConnectedService",
+    "Create apps/api/src/integrations/integrations.controller.ts with routes: GET /integrations/connectors (list available connectors), GET /integrations/connections (list user's connections, JWT protected), POST /integrations/connect/:connectorId (initiate OAuth, JWT protected), GET /integrations/connect/:connectorId/callback (handle OAuth callback), DELETE /integrations/connections/:id (disconnect, JWT protected)",
+    "Wire IntegrationsModule into AppModule",
+    "Create apps/api/src/connectors/__tests__/connector-registry.spec.ts testing register/get/list/has",
+    "Create apps/api/src/integrations/__tests__/integrations.service.spec.ts testing listConnectors, connect (stores state in Redis), handleCallback (validates state, creates ConnectedService)",
+    "Run pnpm run typecheck, pnpm run lint, pnpm run build, pnpm run test"
+  ],
+  "acceptance_criteria": [
+    "ConnectorRegistryService implements the ConnectorRegistry interface",
+    "GET /integrations/connectors returns list of connector manifests",
+    "GET /integrations/connections returns user's connected services",
+    "POST /integrations/connect/:connectorId returns redirectUrl for OAuth",
+    "OAuth state is stored in Redis with 10-min TTL",
+    "DELETE /integrations/connections/:id removes the connection",
+    "All new tests pass",
+    "pnpm run typecheck passes",
+    "pnpm run lint passes",
+    "pnpm run build passes"
+  ],
+  "verification": [
+    "pnpm --filter @open-music/api run test",
+    "pnpm run typecheck",
+    "pnpm run lint",
+    "pnpm run build"
+  ],
+  "blocked_reason": null,
+  "findings": "All verification passed cleanly: 47 tests (7 test files), typecheck, lint, and build. ESLint import/order rule requires external package imports before vitest. ConnectorId branded type cast handled with 'as ConnectorId' instead of 'as any' to satisfy eslint no-explicit-any rule."
+}

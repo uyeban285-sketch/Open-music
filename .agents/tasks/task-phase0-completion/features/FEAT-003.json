@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Create shared TypeScript interfaces for Connector system (Task 3.1), DTO domain models with Zod schemas (Task 3.2), and AI module interfaces (Task 3.3) in packages/shared.",
+  "status": "completed",
+  "steps": [
+    "Add 'zod' as a dependency in packages/shared/package.json",
+    "Create packages/shared/src/connectors/types.ts with interfaces: ConnectorId (branded string type), ConnectionStatus enum (Connected, Disconnected, Error, Token_Expired, Reauth_Required), ConnectorManifest (id, name, description, icon, authMethod, capabilities, rateLimits), ExternalTrack (externalId, connectorId, title, artist, album, duration, coverUrl, isrc, availability, explicit, isLive, genre), ExternalPlaylist (externalId, connectorId, name, owner, trackCount), TokenBundle (accessToken, refreshToken, expiresAt, scope), Page<T> (items, cursor, hasMore, total), ConnectorCtx (userId, connectionId, tokens), PlaybackHandle (streamUrl, format, expiresAt), Lyrics (lines with timestamps)",
+    "Create packages/shared/src/connectors/interfaces.ts with MusicConnector interface (full signature: startAuth, handleCallback, refresh, revoke, listPlaylists, listLikedTracks, listRecentlyPlayed, getTrack, getDeepLink, getPlaybackHandle?, getLyrics?) and ConnectorRegistry interface (register, get, list, has)",
+    "Create packages/shared/src/dto/models.ts with domain model interfaces: InternalTrack, Album, Artist, Playlist, MatchDecision, ListeningEvent, PlaybackSession, User, PrivacySetting, Recommendation, AIProfile, MoodCluster, SyncJob, Notification, FeatureFlag",
+    "Create packages/shared/src/dto/schemas.ts with Zod schemas for all DTOs: internalTrackSchema, albumSchema, artistSchema, playlistSchema, matchDecisionSchema, userSchema, syncJobSchema, notificationSchema, featureFlagSchema, etc.",
+    "Create packages/shared/src/dto/envelope.ts with ProblemDetails (RFC 7807 shape: type, title, status, detail, instance, extensions), PageResponse<T> (items, page, perPage, total, hasMore), ApiError class",
+    "Create packages/shared/src/ai/interfaces.ts with AIModuleManifest (id, type, capabilities, io, cost, privacyClass), RecoSourceManifest, AnalyticsManifest, and registry interfaces AIModuleRegistry, RecoSourceRegistry, AnalyticsRegistry",
+    "Update packages/shared/src/index.ts to re-export everything from connectors/, dto/, ai/ subdirectories",
+    "Run pnpm install to install zod, then pnpm run typecheck and pnpm run lint to verify"
+  ],
+  "acceptance_criteria": [
+    "packages/shared/src/connectors/types.ts exports all connector types",
+    "packages/shared/src/connectors/interfaces.ts exports MusicConnector and ConnectorRegistry interfaces",
+    "packages/shared/src/dto/models.ts exports all domain DTOs",
+    "packages/shared/src/dto/schemas.ts exports Zod validation schemas for key DTOs",
+    "packages/shared/src/dto/envelope.ts exports ProblemDetails, PageResponse, ApiError",
+    "packages/shared/src/ai/interfaces.ts exports AI module manifests and registries",
+    "pnpm run typecheck passes for all packages including those that depend on @open-music/shared",
+    "pnpm run lint passes with no errors"
+  ],
+  "verification": ["pnpm run typecheck", "pnpm run lint", "pnpm run build"],
+  "blocked_reason": null,
+  "findings": "Had to install eslint-import-resolver-typescript as a root devDependency - it was referenced in .eslintrc.cjs settings but missing from package.json. This was a pre-existing gap that only manifested once actual imports existed. All typecheck/lint/build pass. Pre-commit hook (lint-staged) ran prettier+eslint fix on staged files successfully."
+}

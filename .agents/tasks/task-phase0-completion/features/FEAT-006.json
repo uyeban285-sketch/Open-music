@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-006",
+  "type": "feat",
+  "description": "Implement auth module in NestJS (Task 6.1): register/login/refresh/logout/me endpoints with argon2id password hashing, JWT access tokens (15 min), opaque refresh tokens in Redis (30 days, rotated), rate-limit middleware, and JWT guard.",
+  "status": "completed",
+  "steps": [
+    "Add dependencies to apps/api/package.json: argon2 (for argon2id hashing), @nestjs/jwt, @nestjs/passport, passport, passport-jwt, ioredis, uuid, @types/passport-jwt (dev), @types/uuid (dev)",
+    "Create apps/api/src/auth/auth.module.ts importing JwtModule (async config from env: secret, signOptions expiresIn '15m'), RedisModule, PrismaModule",
+    "Create apps/api/src/auth/auth.service.ts with methods: register(email, password, displayName), login(email, password), refresh(refreshToken), logout(refreshToken), getMe(userId). Password hashing uses argon2id with memoryCost=65536 (64MB), timeCost=3, parallelism=1. Refresh tokens are opaque UUIDs stored in Redis with 30-day TTL, rotated on each refresh call (old token deleted, new one issued).",
+    "Create apps/api/src/auth/auth.controller.ts with routes: POST /auth/register, POST /auth/login, POST /auth/refresh, POST /auth/logout, GET /auth/me (protected by JWT guard)",
+    "Create apps/api/src/auth/dto/ with register.dto.ts (email, password, displayName Zod schemas), login.dto.ts (email, password), refresh.dto.ts (refreshToken), and response types (tokens response with accessToken + refreshToken + expiresIn, user response)",
+    "Create apps/api/src/auth/guards/jwt.guard.ts implementing CanActivate that verifies JWT from Authorization Bearer header, extracts userId and role, attaches to request",
+    "Create apps/api/src/auth/strategies/jwt.strategy.ts implementing passport JWT strategy for NestJS",
+    "Create apps/api/src/auth/middleware/rate-limit.middleware.ts implementing NestMiddleware with Redis token-bucket: max 5 attempts per IP+email combo in 15 minutes for /auth/login",
+    "Create apps/api/src/redis/redis.module.ts and redis.service.ts wrapping ioredis client with connection from REDIS_URL env",
+    "Wire the auth module into app.module.ts, configure rate-limit middleware for auth routes",
+    "Run pnpm install, then pnpm run typecheck and pnpm run lint to verify"
+  ],
+  "acceptance_criteria": [
+    "POST /auth/register creates a user with argon2id hashed password and returns tokens",
+    "POST /auth/login validates credentials and returns JWT access + opaque refresh token",
+    "POST /auth/refresh validates and rotates refresh token, returns new token pair",
+    "POST /auth/logout deletes refresh token from Redis",
+    "GET /auth/me requires valid JWT and returns user info",
+    "JWT expires in 15 minutes, refresh token in 30 days",
+    "Rate-limit middleware blocks after 5 failed login attempts per IP+email in 15 min",
+    "pnpm run typecheck passes",
+    "pnpm run lint passes"
+  ],
+  "verification": ["pnpm run typecheck", "pnpm run lint", "pnpm run build"],
+  "blocked_reason": null,
+  "findings": "Used @Inject(ServiceClass) pattern for all DI constructor parameters to satisfy consistent-type-imports ESLint rule while maintaining emitDecoratorMetadata compatibility. The RedisService extends ioredis Redis class directly. pnpm-lock.yaml updated with new deps: @nestjs/jwt, @nestjs/passport, passport, passport-jwt, uuid, @types/passport-jwt, @types/uuid."
+}

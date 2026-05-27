@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement media catalog module (Task 17.1): REST endpoints for library tracks (cursor-based pagination), playlists (CRUD), and likes (add/remove/list). All JWT-protected.",
+  "status": "completed",
+  "steps": [
+    "Create apps/api/src/library/library.service.ts with methods: listTracks(userId, cursor?, limit?), getTrack(userId, trackId), listPlaylists(userId), getPlaylist(userId, playlistId), createPlaylist(userId, title, description?), updatePlaylist(userId, playlistId, data), addTrackToPlaylist(userId, playlistId, trackId), removeTrackFromPlaylist(userId, playlistId, trackId), listLikes(userId, cursor?, limit?), addLike(userId, trackId), removeLike(userId, trackId)",
+    "Implement cursor-based pagination for listTracks and listLikes: use createdAt/id as cursor, return { items, cursor, hasMore }",
+    "Create apps/api/src/library/library.controller.ts with JWT-protected routes: GET /library/tracks, GET /library/tracks/:id, GET /library/playlists, GET /library/playlists/:id, POST /library/playlists, PATCH /library/playlists/:id, POST /library/playlists/:id/tracks (body: {trackId}), DELETE /library/playlists/:playlistId/tracks/:trackId, GET /library/likes, POST /library/likes/:trackId, DELETE /library/likes/:trackId",
+    "Create apps/api/src/library/library.module.ts providing LibraryService",
+    "Wire LibraryModule into AppModule",
+    "Create apps/api/src/library/__tests__/library.service.spec.ts testing: listTracks returns paginated results, createPlaylist creates record, addLike creates record, removeLike deletes record, addTrackToPlaylist increments trackCount",
+    "Run pnpm run typecheck, pnpm run lint, pnpm run build, pnpm run test"
+  ],
+  "acceptance_criteria": [
+    "GET /library/tracks supports cursor-based pagination",
+    "Playlist CRUD works (create, read, update)",
+    "Track can be added/removed from playlist",
+    "Likes can be added/removed",
+    "All endpoints are JWT-protected",
+    "All tests pass",
+    "pnpm run typecheck passes",
+    "pnpm run build passes"
+  ],
+  "verification": [
+    "pnpm --filter @open-music/api run test",
+    "pnpm run typecheck",
+    "pnpm run lint",
+    "pnpm run build"
+  ],
+  "blocked_reason": null,
+  "findings": "All verification steps pass: tests (126 passed), typecheck, lint, and build all succeed. Pre-commit hooks (eslint + prettier) ran successfully."
+}

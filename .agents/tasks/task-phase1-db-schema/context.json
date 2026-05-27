@@ -1,0 +1,27 @@
+{
+  "project_type": "TypeScript monorepo - multi-source music aggregator with NestJS backend, Next.js frontend, Python AI services",
+  "language": "TypeScript (primary), Python 3.11 (AI services)",
+  "build_system": "pnpm workspaces (9.15.0), tsc for individual packages, no Turbo/Nx",
+  "test_framework": "vitest for apps/api unit tests, unplugin-swc for decorator support",
+  "build_command": "pnpm run build",
+  "test_command": "pnpm run test",
+  "verification_instructions": "1. pnpm install --frozen-lockfile, 2. pnpm run lint, 3. pnpm run typecheck, 4. pnpm run build, 5. pnpm run test",
+  "snapshot_or_generated_files": "Prisma client generated via 'prisma generate' (part of build script)",
+  "setup_instructions": "1. pnpm install, 2. Copy .env.example to .env, 3. pnpm infra:up (docker compose), 4. pnpm run dev",
+  "environment_constraints": "OPEN_INTERNET - full network access. Node.js 22. Docker available. pnpm available globally. No running DB available in sandbox (schema-only validation via prisma format/validate).",
+  "contribution_requirements": "Conventional Commits, ESLint + Prettier enforced, strict TypeScript",
+  "key_patterns": "Prisma schema at apps/api/prisma/schema.prisma. Existing models: User (with passwordHash, role enum listener/enthusiast/power_user/admin), PrivacySetting, AuditLog. PrismaModule is global. RLS middleware exists at apps/api/src/common/middleware/rls.middleware.ts. Extensions in docker/postgres/initdb/01-extensions.sql.",
+  "relevant_files": [
+    "apps/api/prisma/schema.prisma",
+    "apps/api/src/prisma/prisma.module.ts",
+    "apps/api/src/prisma/prisma.service.ts",
+    "apps/api/src/common/middleware/rls.middleware.ts",
+    "apps/api/src/app.module.ts",
+    "docker/postgres/initdb/01-extensions.sql",
+    "docker-compose.dev.yml",
+    "packages/shared/src/connectors/types.ts",
+    "packages/shared/src/connectors/interfaces.ts",
+    "packages/shared/src/dto/models.ts"
+  ],
+  "directory_structure": "apps/api (NestJS backend), apps/web (Next.js frontend), services/ai (Python FastAPI), packages/shared (TS contracts), packages/connectors/{yandex-music,youtube-music,file-import} (connector implementations), docker/ (initdb scripts)"
+}

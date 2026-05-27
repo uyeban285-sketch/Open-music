@@ -1,0 +1,21 @@
+{
+  "project_type": "TypeScript monorepo - NestJS backend",
+  "language": "TypeScript",
+  "build_system": "pnpm workspaces, tsc",
+  "test_framework": "vitest with unplugin-swc",
+  "build_command": "pnpm run build",
+  "test_command": "pnpm run test",
+  "verification_instructions": "pnpm run lint, pnpm run typecheck, pnpm run build, pnpm run test",
+  "snapshot_or_generated_files": "Prisma client via prisma generate",
+  "setup_instructions": "pnpm install",
+  "environment_constraints": "OPEN_INTERNET. Node.js 22. No running DB.",
+  "contribution_requirements": "Conventional Commits, ESLint + Prettier, strict TypeScript",
+  "key_patterns": "PlaybackSession model in Prisma with userId (unique), revision (BigInt), state (PlaybackState enum: idle/loading/playing/paused/buffering), currentTrackId, positionMs, queue (Json), shuffle, repeatMode (RepeatMode: off/one/all), volume. JwtAuthGuard at apps/api/src/auth/guards/jwt.guard.ts. @Inject pattern for DI.",
+  "relevant_files": [
+    "apps/api/prisma/schema.prisma",
+    "apps/api/src/app.module.ts",
+    "apps/api/src/auth/guards/jwt.guard.ts",
+    "apps/api/src/auth/auth.controller.ts"
+  ],
+  "directory_structure": "apps/api/src/ modules: auth, audit, common, config, connectors, health, integrations, kms, matching, prisma, redis, token-vault"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement playback module (Task 18.1): state machine (idle/loading/playing/paused/buffering), queue management, REST endpoints for play/pause/seek/next/prev/queue. Persist playback state in PlaybackSession with monotonic revision. Include unit tests for state machine transitions.",
+  "status": "completed",
+  "steps": [
+    "Create apps/api/src/playback/playback-state.ts with pure function applyCommand(session: PlaybackSessionState, command: PlaybackCommand): PlaybackSessionState. Commands: play, pause, seek(positionMs), next, prev, setQueue(trackIds), reorder(from, to), setShuffle(enabled), setRepeat(mode), setVolume(level). State transitions enforce the state machine: idle->loading->playing, playing<->paused, any->buffering->playing.",
+    "Create apps/api/src/playback/playback.service.ts - NestJS Injectable with PrismaService. Methods: getState(userId), play(userId, trackId?), pause(userId), seek(userId, positionMs), next(userId), prev(userId), setQueue(userId, trackIds), reorder(userId, from, to), setShuffle(userId, enabled), setRepeat(userId, mode), setVolume(userId, level). Each method loads PlaybackSession (or creates if none), applies command, increments revision, saves.",
+    "Create apps/api/src/playback/playback.controller.ts with JWT-protected routes: GET /playback/state, POST /playback/play (body: {trackId?}), POST /playback/pause, POST /playback/seek (body: {positionMs}), POST /playback/next, POST /playback/prev, PUT /playback/queue (body: {trackIds}), POST /playback/queue/reorder (body: {from, to})",
+    "Create apps/api/src/playback/playback.module.ts providing PlaybackService",
+    "Wire PlaybackModule into AppModule",
+    "Create apps/api/src/playback/__tests__/playback-state.spec.ts testing state transitions: idle->play->playing, playing->pause->paused, paused->play->playing, seek updates positionMs, next/prev cycle through queue, setQueue replaces queue, reorder moves track, revision increments on each command",
+    "Create apps/api/src/playback/__tests__/playback.service.spec.ts testing: getState creates session if none exists, play transitions state, pause transitions state, queue management",
+    "Run pnpm run typecheck, pnpm run lint, pnpm run build, pnpm run test"
+  ],
+  "acceptance_criteria": [
+    "State machine correctly transitions between idle/loading/playing/paused/buffering",
+    "Each command increments revision monotonically",
+    "Queue operations (set, reorder, next, prev) work correctly",
+    "REST endpoints are JWT-protected and return updated state",
+    "All tests pass",
+    "pnpm run typecheck passes",
+    "pnpm run build passes"
+  ],
+  "verification": [
+    "pnpm --filter @open-music/api run test",
+    "pnpm run typecheck",
+    "pnpm run lint",
+    "pnpm run build"
+  ],
+  "blocked_reason": null,
+  "findings": "All verification passed: tests (117 passed), typecheck, lint, and build all clean. Used vitest with vi.fn() mocking pattern consistent with existing tests. BigInt revision handled correctly in state machine and service layer."
+}

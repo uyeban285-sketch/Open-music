@@ -1,4 +1,6 @@
-// Public exports of @open-music/shared.
-// Contracts for connectors and domain models will be added in tasks 1.2 and 1.3.
-
-export const PACKAGE_NAME = '@open-music/shared';
+export * from './connectors/types';
+export * from './connectors/interfaces';
+export * from './dto/models';
+export * from './dto/schemas';
+export * from './dto/envelope';
+export * from './ai/interfaces';

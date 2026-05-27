@@ -1,0 +1,26 @@
+{
+  "project_type": "TypeScript monorepo - multi-source music aggregator with NestJS backend",
+  "language": "TypeScript",
+  "build_system": "pnpm workspaces, tsc for individual packages",
+  "test_framework": "vitest for apps/api unit tests",
+  "build_command": "pnpm run build",
+  "test_command": "pnpm run test",
+  "verification_instructions": "pnpm run lint, pnpm run typecheck, pnpm run build, pnpm run test",
+  "snapshot_or_generated_files": "Prisma client via prisma generate",
+  "setup_instructions": "pnpm install",
+  "environment_constraints": "OPEN_INTERNET. Node.js 22. No running DB.",
+  "contribution_requirements": "Conventional Commits, ESLint + Prettier, strict TypeScript",
+  "key_patterns": "ConnectorRegistry interface defined in packages/shared/src/connectors/interfaces.ts. MusicConnector interface defined there too. ConnectorManifest in types.ts. Connector packages at packages/connectors/{yandex-music,youtube-music,file-import} are stubs. ConnectedService model in Prisma with status enum. TokenVaultService for token encryption. RedisService for state storage.",
+  "relevant_files": [
+    "packages/shared/src/connectors/interfaces.ts",
+    "packages/shared/src/connectors/types.ts",
+    "packages/connectors/yandex-music/src/index.ts",
+    "packages/connectors/youtube-music/src/index.ts",
+    "packages/connectors/file-import/src/index.ts",
+    "apps/api/src/app.module.ts",
+    "apps/api/src/token-vault/token-vault.service.ts",
+    "apps/api/src/redis/redis.service.ts",
+    "apps/api/prisma/schema.prisma"
+  ],
+  "directory_structure": "apps/api/src/ modules: auth, audit, common, config, health, kms, prisma, redis, token-vault"
+}

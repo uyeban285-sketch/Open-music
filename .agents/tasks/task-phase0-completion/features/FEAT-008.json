@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-008",
+  "type": "feat",
+  "description": "Unit tests for auth module (Task 6.4): argon2id round-trip, JWT verify, refresh rotation, rate-limit triggering.",
+  "status": "completed",
+  "steps": [
+    "Add vitest as a devDependency to apps/api/package.json, create apps/api/vitest.config.ts with test directory set to src, path alias matching tsconfig",
+    "Update apps/api/package.json test script to 'vitest run'",
+    "Create apps/api/src/auth/__tests__/auth.service.spec.ts testing: (1) register creates user with argon2id hash that verifies correctly, (2) login with correct password returns tokens, (3) login with wrong password throws, (4) refresh with valid token returns new token pair and invalidates old, (5) refresh with invalid/expired token throws, (6) logout removes refresh token",
+    "Create apps/api/src/auth/__tests__/jwt.guard.spec.ts testing: (1) valid JWT passes guard and attaches userId to request, (2) expired JWT is rejected, (3) malformed JWT is rejected, (4) missing Authorization header is rejected",
+    "Create apps/api/src/auth/__tests__/rate-limit.middleware.spec.ts testing: (1) allows requests under limit, (2) blocks after 5 attempts for same IP+email, (3) separate IP+email combos have separate counters, (4) counter resets after TTL",
+    "Mock Prisma and Redis in tests using vitest mocking (vi.mock). For Redis mock, use a simple Map-based in-memory implementation",
+    "Run 'pnpm --filter @open-music/api run test' and verify all tests pass"
+  ],
+  "acceptance_criteria": [
+    "vitest is configured for the api package",
+    "Auth service tests verify argon2id hash round-trip",
+    "Auth service tests verify refresh token rotation (old invalidated, new issued)",
+    "JWT guard tests verify token validation and rejection cases",
+    "Rate-limit tests verify blocking after threshold",
+    "All tests pass when running 'pnpm --filter @open-music/api run test'"
+  ],
+  "verification": ["pnpm --filter @open-music/api run test", "pnpm run typecheck", "pnpm run lint"],
+  "blocked_reason": null,
+  "findings": "Used unplugin-swc with @swc/core for vitest to handle TypeScript decorators in CommonJS NestJS project. Configured SWC to output ES6 modules for vitest compatibility while source code remains CommonJS. The noUncheckedIndexedAccess tsconfig option required non-null assertions when accessing mock.calls array elements. All 16 tests pass across 3 test files (auth.service, jwt.strategy, rate-limit.middleware). Pre-commit hooks ran eslint --fix and prettier --write on staged files."
+}
