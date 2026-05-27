@@ -1,0 +1,16 @@
+{
+  "name": "@open-music/mock-kms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local mock-KMS service for envelope encryption (dev only)",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "node --loader ts-node/esm src/server.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.4"
+  }
+}

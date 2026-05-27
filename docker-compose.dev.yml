@@ -57,6 +57,23 @@ services:
       timeout: 5s
       retries: 6
 
+  mock-kms:
+    build:
+      context: ./infra/mock-kms
+      dockerfile: Dockerfile
+    container_name: open-music-mock-kms
+    restart: unless-stopped
+    ports:
+      - '2599:2599'
+    environment:
+      PORT: 2599
+      MASTER_KEY: 'dev-master-key-32-bytes-padding!!'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:2599/healthz']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
 volumes:
   postgres-data:
   redis-data:

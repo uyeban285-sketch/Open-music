@@ -7,3 +7,5 @@ coverage
 *.config.cjs
 .kiro
 .husky
+
+infra
