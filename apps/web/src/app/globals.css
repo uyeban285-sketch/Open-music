@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dynamic palette CSS variables (updated by Dynamic Palette subsystem) */
+  --palette-bg: 0.18 0.04 280;
+  --palette-bg-secondary: 0.25 0.06 280;
+  --palette-accent: 0.7 0.15 280;
+  --palette-text: 0.95 0.02 280;
+  --palette-transition-duration: 600ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --palette-transition-duration: 0ms;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: oklch(var(--palette-bg));
+  color: oklch(var(--palette-text));
+  transition:
+    background-color var(--palette-transition-duration) cubic-bezier(0.4, 0, 0.2, 1),
+    color var(--palette-transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+}
